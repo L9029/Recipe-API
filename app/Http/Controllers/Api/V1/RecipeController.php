@@ -5,15 +5,21 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Models\Recipe;
 use Illuminate\Http\Request;
+use App\Http\Resources\Api\V1\RecipeResource;
+use App\Http\Resources\Api\V1\RecipeCollection;
 
 class RecipeController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Retorna una lista de recetas paginadas.
+     * 
+     * @return \App\Http\Resources\Api\V1\RecipeCollection // Colección de recursos de las recetas
      */
     public function index()
     {
-        //
+        $recipes = Recipe::latest()->paginate(10);
+
+        return new RecipeCollection($recipes);
     }
 
     /**
@@ -25,11 +31,14 @@ class RecipeController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Retorna una receta específica.
+     * 
+     * @param  \App\Models\Recipe  $recipe
+     * @return \App\Http\Resources\Api\V1\RecipeResource // Recurso que formatea la respuesta de una receta
      */
     public function show(Recipe $recipe)
     {
-        //
+        return new RecipeResource($recipe);
     }
 
     /**
