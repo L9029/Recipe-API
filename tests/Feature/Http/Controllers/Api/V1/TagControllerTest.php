@@ -30,6 +30,7 @@ class TagControllerTest extends TestCase
                     '*' => [
                         "id",
                         "name",
+                        "recipes"
                     ]
                 ],
                 'links' => [
@@ -96,6 +97,7 @@ class TagControllerTest extends TestCase
         ->assertJsonFragment([
             'id' => $tag->id,
             'name' => $tag->name,
+            'recipes' => $tag->recipes
         ]);    
     }
 }

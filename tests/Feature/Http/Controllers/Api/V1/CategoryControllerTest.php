@@ -30,6 +30,7 @@ class CategoryControllerTest extends TestCase
                     '*' => [
                         "id",
                         "name",
+                        "recipes",
                     ]
                 ],
                 'links' => [
@@ -96,6 +97,7 @@ class CategoryControllerTest extends TestCase
         ->assertJsonFragment([
             'id' => $category->id,
             'name' => $category->name,
+            'recipes' => $category->recipes,
         ]);    
     }
 }
