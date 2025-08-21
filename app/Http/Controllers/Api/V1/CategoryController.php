@@ -34,7 +34,7 @@ class CategoryController extends Controller
      * Retorna una categoria específico.
      * 
      * @param  \App\Models\Category  $category
-     * @return \App\Http\Resources\V2\PostResource // Recurso que formatea la respuesta de category
+     * @return \App\Http\Resources\Api\V1\CategoryResource // Recurso que formatea la respuesta de category
      */
     public function show(Category $category)
     {
