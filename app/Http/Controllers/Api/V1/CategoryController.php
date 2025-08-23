@@ -17,7 +17,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::latest()->paginate(10); // Se optienen las categorias mas recientes paginadas
+        $categories = Category::with("recipes")->latest()->paginate(10); // Se optienen las categorias mas recientes paginadas
 
         return new CategoryCollection($categories);
     }
@@ -38,7 +38,7 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        return new CategoryResource($category);
+        return new CategoryResource($category->load("recipes"));
     }
 
     /**

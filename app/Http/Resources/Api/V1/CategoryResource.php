@@ -17,6 +17,7 @@ class CategoryResource extends JsonResource
         return [
             "id" => $this->id,
             "name" => $this->name,
+            "recipes" => $this->recipes, // Se incluyen las recetas relacionadas con la categoría
         ];
     }
 }
