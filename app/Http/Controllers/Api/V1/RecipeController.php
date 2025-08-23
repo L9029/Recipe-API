@@ -17,7 +17,7 @@ class RecipeController extends Controller
      */
     public function index()
     {
-        $recipes = Recipe::latest()->paginate(10);
+        $recipes = Recipe::with("category", "tags", "user")->latest()->paginate(10);
 
         return new RecipeCollection($recipes);
     }
@@ -38,7 +38,7 @@ class RecipeController extends Controller
      */
     public function show(Recipe $recipe)
     {
-        return new RecipeResource($recipe);
+        return new RecipeResource($recipe->load("category", "tags", "user"));
     }
 
     /**

@@ -21,8 +21,9 @@ class RecipeResource extends JsonResource
             "ingredients" => $this->ingredients,
             "instructions" => $this->instructions,
             "image" => $this->image,
-            "category_id" => $this->category_id,
-            "user_id" => $this->user_id,
+            "category" => $this->category->toArray(),
+            "tags" => $this->tags->toArray(),
+            "user" => $this->user->toArray(),
         ];
     }
 }
