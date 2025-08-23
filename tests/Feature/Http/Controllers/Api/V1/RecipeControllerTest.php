@@ -34,15 +34,9 @@ class RecipeControllerTest extends TestCase
                         "ingredients",
                         "instructions",
                         "image",
-                        "category" => [
-                            '*'
-                        ],
-                        "tags" => [
-                            '*'
-                        ],
-                        "user" => [
-                            '*'
-                        ],
+                        "category",
+                        "tags",
+                        "user",
                     ]
                 ],
                 'links' => [
@@ -112,9 +106,9 @@ class RecipeControllerTest extends TestCase
             "description" => $recipe->description,
             "ingredients" => $recipe->ingredients,
             "instructions" => $recipe->instructions,
-            "category" => $recipe->category,
-            "tags" => $recipe->tags,
-            "user" => $recipe->user,
+            "category" => $recipe->category->toArray(),
+            "tags" => $recipe->tags->toArray(),
+            "user" => $recipe->user->toArray(),
         ]);    
     }
 }
