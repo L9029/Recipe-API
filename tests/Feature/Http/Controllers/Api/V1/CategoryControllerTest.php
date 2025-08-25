@@ -29,8 +29,32 @@ class CategoryControllerTest extends TestCase
                 'data' => [
                     '*' => [
                         "id",
-                        "name",
-                        "recipes",
+                        "type",
+                        "attributes" => [
+                            "name",
+                        ],
+                        "relationships" => [
+                            "recipes" => [
+                                "*" => [
+                                    "id",
+                                    "title",
+                                    "descripcion",
+                                    "ingredients",
+                                    "instructions",
+                                    "image",
+                                    "category",
+                                    "tags" => [
+                                        "id",
+                                        "name",
+                                    ],
+                                    "user" => [
+                                        "id",
+                                        "name",
+                                        "email",
+                                    ],
+                                ]
+                            ]
+                        ]
                     ]
                 ],
                 'links' => [
@@ -95,9 +119,14 @@ class CategoryControllerTest extends TestCase
         $this->getJson('/api/v1/categories/' . $category->id)
         ->assertStatus(200)
         ->assertJsonFragment([
-            'id' => $category->id,
-            'name' => $category->name,
-            'recipes' => $category->recipes,
+            "id" => $category->id,
+            "type" => "category",
+            "attributes" => [
+                "name" => $category->name,
+            ],
+            "relationships" => [
+                "recipes" => $category->recipes,
+            ]
         ]);    
     }
 }

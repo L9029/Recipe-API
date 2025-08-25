@@ -29,8 +29,32 @@ class TagControllerTest extends TestCase
                 'data' => [
                     '*' => [
                         "id",
-                        "name",
-                        "recipes"
+                        "type",
+                        "attributes" => [
+                            "name",
+                        ],
+                        "relationships" => [
+                            "recipes" => [
+                                "*" => [
+                                    "id",
+                                    "title",
+                                    "descripcion",
+                                    "ingredients",
+                                    "instructions",
+                                    "image",
+                                    "category" => [
+                                        "id",
+                                        "name",
+                                    ],
+                                    "tag",
+                                    "user" => [
+                                        "id",
+                                        "name",
+                                        "email",
+                                    ],
+                                ]
+                            ]
+                        ]
                     ]
                 ],
                 'links' => [
@@ -96,8 +120,13 @@ class TagControllerTest extends TestCase
         ->assertStatus(200)
         ->assertJsonFragment([
             'id' => $tag->id,
-            'name' => $tag->name,
-            'recipes' => $tag->recipes
+            "type" => "tag",
+            "attributes" => [
+                'name' => $tag->name,
+            ],
+            "relationships" => [
+                'recipes' => $tag->recipes
+            ]
         ]);    
     }
 }
