@@ -29,15 +29,25 @@ class RecipeControllerTest extends TestCase
                 'data' => [
                     '*' => [
                         "id",
-                        "title",
-                        "description",
-                        "ingredients",
-                        "instructions",
-                        "image",
-                        "category",
-                        "tags",
-                        "user",
-                    ]
+                        "type",
+                        "attributes" => [
+                            "title",
+                            "description",
+                            "ingredients",
+                            "instructions",
+                            "image",
+                            "category" => [
+                                "id",
+                                "name",
+                            ],
+                            "author" => [
+                                "id",
+                                "name",
+                                "email",
+                            ],
+                            "tags"
+                        ],
+                    ],
                 ],
                 'links' => [
                     'first',
@@ -102,13 +112,24 @@ class RecipeControllerTest extends TestCase
         ->assertStatus(200)
         ->assertJsonFragment([
             'id' => $recipe->id,
-            "title" => $recipe->title,
-            "description" => $recipe->description,
-            "ingredients" => $recipe->ingredients,
-            "instructions" => $recipe->instructions,
-            "category" => $recipe->category->toArray(),
-            "tags" => $recipe->tags->toArray(),
-            "user" => $recipe->user->toArray(),
+            "type" => "recipe",
+            "attributes" => [
+                "title" => $recipe->title,
+                "description" => $recipe->description,
+                "ingredients" => $recipe->ingredients,
+                "instructions" => $recipe->instructions,
+                "image" => $recipe->image,
+                "category" => [
+                    "id" => $recipe->category->id,
+                    "name" => $recipe->category->name,
+                ],
+                "author" => [
+                    "id" => $recipe->user->id,
+                    "name" => $recipe->user->name,
+                    "email" => $recipe->user->email,
+                ],
+                "tags" => $recipe->tags->toArray(),
+            ],
         ]);    
     }
 }
