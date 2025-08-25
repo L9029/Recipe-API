@@ -16,8 +16,32 @@ class TagResource extends JsonResource
     {
         return [
             "id" => $this->id,
-            "name" => $this->name,
-            "recipes" => $this->recipes,
+            "type" => "tag",
+            "attributes" => [
+                "name" => $this->name,
+            ],
+            "relationships" => [
+                "recipes" => $this->recipes->map(function($recipe) {
+                    return [
+                        "id" => $recipe->id,
+                        "title" => $recipe->title,
+                        "description" => $recipe->description,
+                        "ingredients" => $recipe->ingredients,
+                        "instructions" => $recipe->instructions,
+                        "image" => $recipe->image,
+                        "category" => [
+                            "id" => $recipe->category->id,
+                            "name" => $recipe->category->name,
+                        ],
+                        "tags" => $this->id,
+                        "user" => [
+                            "id" => $recipe->user->id,
+                            "name" => $recipe->user->name,
+                            "email" => $recipe->user->email,
+                        ],
+                    ];
+                }),
+            ]
         ];
     }
 }

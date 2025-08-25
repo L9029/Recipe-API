@@ -14,10 +14,37 @@ class CategoryResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // Formatea la respuesta de la categoría incluyendo sus recetas relacionadas
         return [
             "id" => $this->id,
-            "name" => $this->name,
-            "recipes" => $this->recipes, // Se incluyen las recetas relacionadas con la categoría
+            "type" => "category",
+            "attributes" => [
+                "name" => $this->name,
+            ],
+            "relationships" => [
+                "recipes" => $this->recipes->map(function($recipe) {
+                    return [
+                        "id" => $recipe->id,
+                        "title" => $recipe->title,
+                        "description" => $recipe->description,
+                        "ingredients" => $recipe->ingredients,
+                        "instructions" => $recipe->instructions,
+                        "image" => $recipe->image,
+                        "category" => $recipe->category_id,
+                        "tags" => $recipe->tags->map(function($tag) {
+                            return [
+                                "id" => $tag->id,
+                                "name" => $tag->name,
+                            ];
+                        }),
+                        "user" => [
+                            "id" => $recipe->user->id,
+                            "name" => $recipe->user->name,
+                            "email" => $recipe->user->email,
+                        ],
+                    ];
+                }),
+            ]
         ];
     }
 }
