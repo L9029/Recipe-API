@@ -16,14 +16,29 @@ class RecipeResource extends JsonResource
     {
         return [
             "id" => $this->id,
-            "title" => $this->title,
-            "description" => $this->description,
-            "ingredients" => $this->ingredients,
-            "instructions" => $this->instructions,
-            "image" => $this->image,
-            "category" => $this->category->toArray(),
-            "tags" => $this->tags->toArray(),
-            "user" => $this->user->toArray(),
+            "type" => "recipe",
+            "attributes" => [
+                "title" => $this->title,
+                "description" => $this->description,
+                "ingredients" => $this->ingredients,
+                "instructions" => $this->instructions,
+                "image" => $this->image,
+                "category" => [
+                    "id" => $this->category->id,
+                    "name" => $this->category->name,
+                ],
+                "author" => [
+                    "id" => $this->user->id,
+                    "name" => $this->user->name,
+                    "email" => $this->user->email,
+                ],
+                "tags" => $this->tags->map(function($tag) {
+                    return [
+                        "id" => $tag->id,
+                        "name" => $tag->name,
+                    ];
+                }),
+            ],
         ];
     }
 }
