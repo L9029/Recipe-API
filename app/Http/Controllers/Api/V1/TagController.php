@@ -17,7 +17,7 @@ class TagController extends Controller
      */
     public function index()
     {
-        $tags = Tag::with("recipes")->latest()->paginate(10);
+        $tags = Tag::with("recipes.category", "recipes.tags", "recipes.user")->latest()->paginate(10);
 
         return new TagCollection($tags);
     }
@@ -38,7 +38,9 @@ class TagController extends Controller
      */
     public function show(Tag $tag)
     {
-        return new TagResource($tag->load("recipes"));
+        $tag = $tag->load("recipes.category", "recipes.tags", "recipes.user");
+
+        return new TagResource($tag);
     }
 
     /**
