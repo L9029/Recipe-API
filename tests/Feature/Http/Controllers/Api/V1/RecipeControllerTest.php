@@ -252,8 +252,13 @@ class RecipeControllerTest extends TestCase
      */
     public function test_api_recipe_validate_update() : void 
     {
+        // Usuario dueño de la receta
+        $user = User::factory()->create();
+
         // Se crea una receta nueva que va a ser actualizada
-        $recipe = Recipe::factory()->create();
+        $recipe = Recipe::factory()->create([
+            "user_id" => $user->id,
+        ]);
 
         // Datos de prueba para actualizar una receta incompletos
         $data = [
