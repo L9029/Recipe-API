@@ -165,7 +165,15 @@ class RecipeControllerTest extends TestCase
             ->assertStatus(201);
         
         // Por ultimo se verifica que la receta se haya creado en la base de datos
-        $this->assertDatabaseHas("recipes", $data);
+        $this->assertDatabaseHas("recipes", [
+            "title" => $data["title"],
+            "description" => $data["description"],
+            "ingredients" => $data["ingredients"],
+            "instructions" => $data["instructions"],
+            "image" => $data["image"],
+            "category_id" => $data["category_id"],
+            "user_id" => $data["user_id"],
+        ]);
     }
 
     /**
@@ -225,7 +233,16 @@ class RecipeControllerTest extends TestCase
             ->assertStatus(200);
         
         // Por ultimo se verifica que la receta se haya actualizado en la base de datos
-        $this->assertDatabaseHas("recipes", $data);
+        $this->assertDatabaseHas("recipes", [
+            "id" => $recipe->id,
+            "title" => $data["title"],
+            "description" => $data["description"],
+            "ingredients" => $data["ingredients"],
+            "instructions" => $data["instructions"],
+            "image" => $data["image"],
+            "category_id" => $data["category_id"],
+            "user_id" => $user->id,
+        ]);
     }
 
     /**

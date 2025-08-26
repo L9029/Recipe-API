@@ -20,5 +20,5 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('tags', TagController::class)->only(['index', 'show']);
 
     // Recetas
-    Route::apiResource('recipes', RecipeController::class)->only(['index', 'show']);
+    Route::apiResource('recipes', RecipeController::class);
 });
