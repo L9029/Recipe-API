@@ -84,10 +84,15 @@ class RecipeController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Elimina una receta específica de la base de datos.
+     * 
+     * @param  \App\Models\Recipe  $recipe
+     * @return \Illuminate\Http\Response // Respuesta HTTP sin contenido (204)
      */
     public function destroy(Recipe $recipe)
     {
-        //
+        $recipe->delete();
+
+        return response()->json(null, Response::HTTP_NO_CONTENT); // Código de estado HTTP 204 (No Content)
     }
 }
