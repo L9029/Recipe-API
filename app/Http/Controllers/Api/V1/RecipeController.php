@@ -7,6 +7,8 @@ use App\Models\Recipe;
 use Illuminate\Http\Request;
 use App\Http\Resources\Api\V1\RecipeResource;
 use App\Http\Resources\Api\V1\RecipeCollection;
+use App\Http\Requests\Api\V1\StoreRecipeRequest;
+use Symfony\Component\HttpFoundation\Response; // Para usar constantes de códigos de estado HTTP
 
 class RecipeController extends Controller
 {
@@ -23,11 +25,26 @@ class RecipeController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Almacena una nueva receta en la base de datos.
+     * 
+     * @param  \App\Http\Requests\Api\V1\StoreRecipeRequest  $validate_store_request
+     * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreRecipeRequest $request)
     {
-        //
+        $recipe = Recipe::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'ingredients' => $request->ingredients,
+            'instructions' => $request->instructions,
+            'image' => $request->image,
+            'category_id' => $request->category_id,
+            'user_id' => $request->user_id,
+        ]);
+
+        $recipe->tags()->attach($request->tags); // Asocia las etiquetas a la receta
+
+        return response()->json(new RecipeResource($recipe->load("category", "tags", "user")), Response::HTTP_CREATED);
     }
 
     /**
