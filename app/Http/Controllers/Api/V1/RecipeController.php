@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Resources\Api\V1\RecipeResource;
 use App\Http\Resources\Api\V1\RecipeCollection;
 use App\Http\Requests\Api\V1\StoreRecipeRequest;
+use App\Http\Requests\Api\V1\UpdateRecipeRequest;
 use Symfony\Component\HttpFoundation\Response; // Para usar constantes de códigos de estado HTTP
 
 class RecipeController extends Controller
@@ -28,7 +29,7 @@ class RecipeController extends Controller
      * Almacena una nueva receta en la base de datos.
      * 
      * @param  \App\Http\Requests\Api\V1\StoreRecipeRequest  $validate_store_request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse // Respuesta JSON con la receta creada y el código de estado HTTP 201
      */
     public function store(StoreRecipeRequest $request)
     {
@@ -59,11 +60,27 @@ class RecipeController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza una receta específica en la base de datos.
+     * 
+     * @param  \App\Http\Requests\Api\V1\UpdateRecipeRequest  $request
+     * @param  \App\Models\Recipe  $recipe
+     * @return \Illuminate\Http\JsonResponse // Respuesta JSON con la receta actualizada y el código de estado HTTP 200
      */
-    public function update(Request $request, Recipe $recipe)
+    public function update(UpdateRecipeRequest $request, Recipe $recipe)
     {
-        //
+        $recipe->update([
+            "title" => $request->title,
+            "description" => $request->description,
+            "ingredients" => $request->ingredients,
+            "instructions" => $request->instructions,
+            "image" => $request->image,
+            "category_id" => $request->category_id,
+            "user_id" => $request->user()->id,
+        ]);
+
+        $recipe->tags()->sync($request->tags); // Actualiza las etiquetas asociadas a la receta
+
+        return response()->json(new RecipeResource($recipe->load("category", "tags", "user")), Response::HTTP_OK); // Código de estado HTTP 200 (OK)
     }
 
     /**
