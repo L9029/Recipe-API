@@ -6,6 +6,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\Recipe;
+use App\Models\Category;
+use App\Models\Tag;
+use App\Models\User;
 
 class RecipeControllerTest extends TestCase
 {
@@ -131,5 +134,204 @@ class RecipeControllerTest extends TestCase
                 "tags" => $recipe->tags->toArray(),
             ],
         ]);    
+    }
+
+    /**
+     * Test que valida que la api pueda crear una receta correctamente
+     * 
+     * @return void
+     */
+    public function test_api_recipe_store() : void 
+    {
+        // Se crean los registros necesarios para el test
+        $user = User::factory()->create();
+        $category = Category::factory()->create();
+        $tags = Tag::factory(2)->create();
+
+        // Datos de prueba para crear una receta
+        $data = [
+            "title" => "Receta de prueba",
+            "description" => "Descripción de la receta de prueba",
+            "ingredients" => "Ingredientes de la receta de prueba",
+            "instructions" => "Instrucciones de la receta de prueba",
+            "image" => "http://example.com/image.jpg",
+            "category_id" => $category->id,
+            "tags" => $tags->pluck("id")->toArray(),
+            "user_id" => $user->id,
+        ];
+
+        // Se realiza la solicitud POST a la ruta store de recipes y se verifica que la receta se haya creado correctamente
+        $this->postJson("api/v1/recipes", $data)
+            ->assertStatus(201);
+        
+        // Por ultimo se verifica que la receta se haya creado en la base de datos
+        $this->assertDatabaseHas("recipes", $data);
+    }
+
+    /**
+     * Test que valida que la api no pueda crear una receta sin los datos necesarios
+     * 
+     * @return void
+     */
+    public function test_api_recipe_validate_store() : void 
+    {
+        // Datos de prueba para crear una receta incompletos
+        $data = [
+            "title" => null,
+            "ingredients" => "Ingredientes de la receta de prueba",
+            "image" => "http://example.com/image.jpg",
+            "category_id" => "prueba",
+            "tags" => "prueba",
+        ];
+
+        $this->postJson("api/v1/recipes", $data)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['title', 'description', 'instructions', 'category_id', 'tags', "user_id"]);
+    }
+
+    /**
+     * Test que valida que la api pueda actualizar una receta correctamente
+     * 
+     * @return void
+     */
+    public function test_api_recipe_update() : void 
+    {
+        // Usuario dueño de la receta
+        $user = User::factory()->create();
+
+        // Se crea una receta nueva que va a ser actualizada
+        $recipe = Recipe::factory()->create([
+            "user_id" => $user->id,
+        ]);
+
+        // Se crean registros nuevos para actualizar la receta
+        $category = Category::factory()->create();
+        $tags = Tag::factory(2)->create();
+
+        // Datos de prueba para actualizar una receta
+        $data = [
+            "title" => "Receta de prueba",
+            "description" => "Descripción de la receta de prueba",
+            "ingredients" => "Ingredientes de la receta de prueba",
+            "instructions" => "Instrucciones de la receta de prueba",
+            "image" => "http://example.com/image.jpg",
+            "category_id" => $category->id,
+            "tags" => $tags->pluck("id")->toArray(),
+        ];
+
+        // Se realiza la solicitud PUT a la ruta update de recipes y se verifica que la receta se haya actualizado correctamente
+        $this->actingAs($user)
+            ->putJson("api/v1/recipes/{$recipe->id}", $data)
+            ->assertStatus(200);
+        
+        // Por ultimo se verifica que la receta se haya actualizado en la base de datos
+        $this->assertDatabaseHas("recipes", $data);
+    }
+
+    /**
+     * Test que valida que la api no pueda actualizar una receta sin los datos necesarios
+     * 
+     * @return void
+     */
+    public function test_api_recipe_validate_update() : void 
+    {
+        // Se crea una receta nueva que va a ser actualizada
+        $recipe = Recipe::factory()->create();
+
+        // Datos de prueba para actualizar una receta incompletos
+        $data = [
+            "title" => null,
+            "ingredients" => "Ingredientes de la receta de prueba",
+            "image" => "http://example.com/image.jpg",
+            "category_id" => "prueba",
+            "tags" => "prueba",
+        ];
+
+        $this->actingAs($user)
+            ->putJson("api/v1/recipes/{$recipe->id}", $data)
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['title', 'description', 'instructions', 'category_id', 'tags']);
+    }
+
+    /**
+     * Test que valida que un usuario no pueda actualizar una receta que no le pertenece
+     * 
+     * @return void
+     */
+    public function test_api_recipe_update_policy() : void
+    {
+        // Se crea una receta nueva que va a ser actualizada
+        $recipe = Recipe::factory()->create();
+
+        // Se crean registros nuevos para actualizar la receta
+        $user = User::factory()->create(); // Usuario diferente al creado en la receta
+        $category = Category::factory()->create();
+        $tags = Tag::factory(2)->create();
+
+        // Datos de prueba para actualizar una receta
+        $data = [
+            "title" => "Receta de prueba",
+            "description" => "Descripción de la receta de prueba",
+            "ingredients" => "Ingredientes de la receta de prueba",
+            "instructions" => "Instrucciones de la receta de prueba",
+            "image" => "http://example.com/image.jpg",
+            "category_id" => $category->id,
+            "tags" => $tags->pluck("id")->toArray(),
+            "user_id" => $user->id,
+        ];
+
+        // Se realiza la solicitud PUT a la ruta update de recipes y se verifica que la receta no se haya actualizado
+        $this->actingAs($user)
+            ->putJson("api/v1/recipes/{$recipe->id}", $data)
+            ->assertStatus(403);
+
+        // Por ultimo se verifica que la receta no se haya actualizado en la base de datos
+        $this->assertDatabaseMissing("recipes", $data);
+    }
+
+    /**
+     * Test que valida que la api pueda eliminar una receta correctamente
+     * 
+     * @return void
+     */
+    public function test_api_recipes_destroy() : void
+    {
+        // Usuario dueño de la receta
+        $user = User::factory()->create();
+
+        // Se crea una receta nueva que va a ser eliminada
+        $recipe = Recipe::factory()->create([
+            "user_id" => $user->id,
+        ]);
+
+        // Se realiza la solicitud DELETE a la ruta destroy de recipes y se verifica que la receta se haya eliminado correctamente
+        $this->actingAs($user)
+            ->deleteJson("api/v1/recipes/{$recipe->id}")
+            ->assertStatus(204);
+
+        // Por ultimo se verifica que la receta se haya eliminado en la base de datos
+        $this->assertDatabaseMissing("recipes", $recipe->toArray());
+    }
+
+    /**
+     * Test que valida que un usuario no pueda eliminar una receta que no le pertenece
+     * 
+     * @return void
+     */
+    public function test_api_recipe_destroy_policy() : void
+    {
+        // Se crea una receta nueva que va a ser eliminada
+        $recipe = Recipe::factory()->create();
+
+        // Se crea un usuario diferente al dueño de la receta
+        $user = User::factory()->create();
+
+        // Se realiza la solicitud DELETE a la ruta destroy de recipes y se verifica que la receta no se haya eliminado
+        $this->actingAs($user)
+            ->deleteJson("api/v1/recipes/{$recipe->id}")
+            ->assertStatus(403);
+
+        // Por ultimo se verifica que la receta no se haya eliminado en la base de datos
+        $this->assertDatabaseHas("recipes", $recipe->toArray());
     }
 }
