@@ -10,9 +10,12 @@ use App\Http\Resources\Api\V1\RecipeCollection;
 use App\Http\Requests\Api\V1\StoreRecipeRequest;
 use App\Http\Requests\Api\V1\UpdateRecipeRequest;
 use Symfony\Component\HttpFoundation\Response; // Para usar constantes de códigos de estado HTTP
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class RecipeController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Retorna una lista de recetas paginadas.
      * 
@@ -68,6 +71,9 @@ class RecipeController extends Controller
      */
     public function update(UpdateRecipeRequest $request, Recipe $recipe)
     {
+        // Verifica si el usuario autenticado tiene permiso para actualizar la receta
+        $this->authorize('pass', $recipe);
+
         $recipe->update([
             "title" => $request->title,
             "description" => $request->description,
@@ -91,6 +97,9 @@ class RecipeController extends Controller
      */
     public function destroy(Recipe $recipe)
     {
+        // Verifica si el usuario autenticado tiene permiso para eliminar la receta
+        $this->authorize('pass', $recipe);
+
         $recipe->delete();
 
         return response()->json(null, Response::HTTP_NO_CONTENT); // Código de estado HTTP 204 (No Content)
