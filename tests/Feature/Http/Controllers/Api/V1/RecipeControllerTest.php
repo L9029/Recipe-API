@@ -354,6 +354,17 @@ class RecipeControllerTest extends TestCase
             ->assertStatus(403);
 
         // Por ultimo se verifica que la receta no se haya eliminado en la base de datos
-        $this->assertDatabaseHas("recipes", $recipe->toArray());
+        $this->assertDatabaseHas("recipes", [
+            "id" => $recipe->id,
+            "title" => $recipe->title,
+            "description" => $recipe->description,
+            "ingredients" => $recipe->ingredients,
+            "instructions" => $recipe->instructions,
+            "image" => $recipe->image,
+            "category_id" => $recipe->category_id,
+            "user_id" => $recipe->user_id,
+            "created_at" => $recipe->created_at,
+            "updated_at" => $recipe->updated_at,
+        ]);
     }
 }
