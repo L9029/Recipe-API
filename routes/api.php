@@ -5,10 +5,14 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\TagController;
 use App\Http\Controllers\Api\V1\RecipeController;
+use App\Http\Controllers\Api\LoginController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
+// Login
+Route::post("v1/login", [LoginController::class, "login"]);
 
 // Rutas de la API versión 1
 Route::middleware("auth:sanctum")->prefix('v1')->group(function () {
