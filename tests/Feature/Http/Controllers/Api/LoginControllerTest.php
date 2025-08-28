@@ -23,8 +23,8 @@ class LoginControllerTest extends TestCase
 
         // Datos erroneos
         $data = [
-            "email" => "prueba@gmail.com",
-            "password" => "12345678",
+            "email" => "prueba@.com",
+            "password" => null,
             "device_name" => null,
         ];
 
@@ -32,6 +32,35 @@ class LoginControllerTest extends TestCase
         $this->postJson("api/v1/login", $data)
             ->assertStatus(422)
             ->assertJsonValidationErrors(["email", "password", "device_name"]);
+        
+        // Verifica que no se haya creado un token de acceso personal
+        $this->assertDatabaseMissing("personal_access_tokens", [
+            "tokenable_id" => $user->id,
+            "tokenable_type" => User::class,
+        ]);
+    }
+
+    /**
+     * Test que valida la politica de autenticación al iniciar sesión.
+     */
+    public function test_api_login_authentication_policy() : void
+    {
+        // Usuario existente en la BD
+        $user = User::factory()->create();
+
+        // Datos erroneos
+        $data = [
+            "email" => $user->email,
+            "password" => "incorrecto",
+            "device_name" => "android",
+        ];
+
+        // Simula una solicitud POST a la ruta de inicio de sesión de la API
+        $this->postJson("api/v1/login", $data)
+            ->assertStatus(401)
+            ->assertExactJson([
+                "message" => "The provided credentials are incorrect."
+            ]);
         
         // Verifica que no se haya creado un token de acceso personal
         $this->assertDatabaseMissing("personal_access_tokens", [
@@ -52,7 +81,7 @@ class LoginControllerTest extends TestCase
 
         // Datos Correctos
         $data = [
-            "email" => $user->emial,
+            "email" => $user->email,
             "password" => $user->password,
             "device_name" => "android",
         ];
