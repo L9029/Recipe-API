@@ -21,11 +21,15 @@ class RecipeControllerTest extends TestCase
      */
     public function test_api_recipe_index_with_data() : void 
     {
+        // Usuario que simula la consulta a la API
+        $user = User::factory()->create();
+
         // Se crean los registros necesarios para el test
         Recipe::factory(10)->create();
 
         // Realiza la solicitud GET a la ruta index de recipes y verifica que la respuesta venga en formato JSON con paginación y los datos correctos
-        $this->getJson('/api/v1/recipes')
+        $this->actingAs($user, "sanctum")
+            ->getJson('/api/v1/recipes')
             ->assertStatus(200)
             ->assertJsonCount(10, 'data')
             ->assertJsonStructure([
@@ -77,28 +81,32 @@ class RecipeControllerTest extends TestCase
      */
     public function test_api_recipe_index_without_data() : void
     {
+        // Usuario que simula la consulta a la API
+        $user = User::factory()->create();
+
         // Realiza la solicitud GET a la ruta index de recipes y verifica que la respuesta venga en formato JSON con paginación y los datos vacios
-        $this->getJson('/api/v1/recipes')
-        ->assertStatus(200)
-        ->assertJsonCount(0, 'data')
-        ->assertJsonStructure([
-            'data' => [],
-            'links' => [
-                'first',
-                'last',
-                'prev',
-                'next'
-            ],
-            'meta' => [
-                'current_page',
-                'from',
-                'last_page',
-                'path',
-                'per_page',
-                'to',
-                'total'
-            ]
-        ]);
+        $this->actingAs($user, "sanctum")
+            ->getJson('/api/v1/recipes')
+            ->assertStatus(200)
+            ->assertJsonCount(0, 'data')
+            ->assertJsonStructure([
+                'data' => [],
+                'links' => [
+                    'first',
+                    'last',
+                    'prev',
+                    'next'
+                ],
+                'meta' => [
+                    'current_page',
+                    'from',
+                    'last_page',
+                    'path',
+                    'per_page',
+                    'to',
+                    'total'
+                ]
+            ]);
     }
 
     /**
@@ -108,32 +116,36 @@ class RecipeControllerTest extends TestCase
      */
     public function test_api_recipe_show() : void
     {
+        // Usuario que simula la consulta a la API
+        $user = User::factory()->create();
+
         $recipe = Recipe::factory()->create();
 
         // Realiza la solicitud GET a la ruta show de una receta específica y verifica la respuesta
-        $this->getJson('/api/v1/recipes/' . $recipe->id)
-        ->assertStatus(200)
-        ->assertJsonFragment([
-            'id' => $recipe->id,
-            "type" => "recipe",
-            "attributes" => [
-                "title" => $recipe->title,
-                "description" => $recipe->description,
-                "ingredients" => $recipe->ingredients,
-                "instructions" => $recipe->instructions,
-                "image" => $recipe->image,
-                "category" => [
-                    "id" => $recipe->category->id,
-                    "name" => $recipe->category->name,
+        $this->actingAs($user, "sanctum")
+            ->getJson('/api/v1/recipes/' . $recipe->id)
+            ->assertStatus(200)
+            ->assertJsonFragment([
+                'id' => $recipe->id,
+                "type" => "recipe",
+                "attributes" => [
+                    "title" => $recipe->title,
+                    "description" => $recipe->description,
+                    "ingredients" => $recipe->ingredients,
+                    "instructions" => $recipe->instructions,
+                    "image" => $recipe->image,
+                    "category" => [
+                        "id" => $recipe->category->id,
+                        "name" => $recipe->category->name,
+                    ],
+                    "author" => [
+                        "id" => $recipe->user->id,
+                        "name" => $recipe->user->name,
+                        "email" => $recipe->user->email,
+                    ],
+                    "tags" => $recipe->tags->toArray(),
                 ],
-                "author" => [
-                    "id" => $recipe->user->id,
-                    "name" => $recipe->user->name,
-                    "email" => $recipe->user->email,
-                ],
-                "tags" => $recipe->tags->toArray(),
-            ],
-        ]);    
+            ]);
     }
 
     /**
@@ -161,7 +173,8 @@ class RecipeControllerTest extends TestCase
         ];
 
         // Se realiza la solicitud POST a la ruta store de recipes y se verifica que la receta se haya creado correctamente
-        $this->postJson("api/v1/recipes", $data)
+        $this->actingAs($user, "sanctum")
+            ->postJson("api/v1/recipes", $data)
             ->assertStatus(201);
         
         // Por ultimo se verifica que la receta se haya creado en la base de datos
@@ -183,6 +196,9 @@ class RecipeControllerTest extends TestCase
      */
     public function test_api_recipe_validate_store() : void 
     {
+        // Usuario que simula la creación de la receta
+        $user = User::factory()->create();
+
         // Datos de prueba para crear una receta incompletos
         $data = [
             "title" => null,
@@ -192,7 +208,8 @@ class RecipeControllerTest extends TestCase
             "tags" => "prueba",
         ];
 
-        $this->postJson("api/v1/recipes", $data)
+        $this->actingAs($user, "sanctum")
+            ->postJson("api/v1/recipes", $data)
             ->assertStatus(422)
             ->assertJsonValidationErrors(['title', 'description', 'instructions', 'category_id', 'tags', "user_id"]);
     }
@@ -228,7 +245,7 @@ class RecipeControllerTest extends TestCase
         ];
 
         // Se realiza la solicitud PUT a la ruta update de recipes y se verifica que la receta se haya actualizado correctamente
-        $this->actingAs($user)
+        $this->actingAs($user, "sanctum")
             ->putJson("api/v1/recipes/{$recipe->id}", $data)
             ->assertStatus(200);
         
@@ -269,7 +286,7 @@ class RecipeControllerTest extends TestCase
             "tags" => "prueba",
         ];
 
-        $this->actingAs($user)
+        $this->actingAs($user, "sanctum")
             ->putJson("api/v1/recipes/{$recipe->id}", $data)
             ->assertStatus(422)
             ->assertJsonValidationErrors(['title', 'description', 'instructions', 'category_id', 'tags']);
@@ -303,7 +320,7 @@ class RecipeControllerTest extends TestCase
         ];
 
         // Se realiza la solicitud PUT a la ruta update de recipes y se verifica que la receta no se haya actualizado
-        $this->actingAs($user)
+        $this->actingAs($user, "sanctum")
             ->putJson("api/v1/recipes/{$recipe->id}", $data)
             ->assertStatus(403);
 
@@ -327,7 +344,7 @@ class RecipeControllerTest extends TestCase
         ]);
 
         // Se realiza la solicitud DELETE a la ruta destroy de recipes y se verifica que la receta se haya eliminado correctamente
-        $this->actingAs($user)
+        $this->actingAs($user, "sanctum")
             ->deleteJson("api/v1/recipes/{$recipe->id}")
             ->assertStatus(204);
 
@@ -349,7 +366,7 @@ class RecipeControllerTest extends TestCase
         $user = User::factory()->create();
 
         // Se realiza la solicitud DELETE a la ruta destroy de recipes y se verifica que la receta no se haya eliminado
-        $this->actingAs($user)
+        $this->actingAs($user, "sanctum")
             ->deleteJson("api/v1/recipes/{$recipe->id}")
             ->assertStatus(403);
 

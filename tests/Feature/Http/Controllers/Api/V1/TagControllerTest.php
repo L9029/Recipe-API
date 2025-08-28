@@ -6,6 +6,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\Tag;
+use App\Models\User;
 
 class TagControllerTest extends TestCase
 {
@@ -18,11 +19,15 @@ class TagControllerTest extends TestCase
      */
     public function test_api_tag_index_with_data() : void 
     {
+        // Usuario que simula la consulta a la API
+        $user = User::factory()->create();
+
         // Se crean los registros necesarios para el test
         Tag::factory(10)->create();
 
         // Realiza la solicitud GET a la ruta index de tags y verifica que la respuesta venga en formato JSON con paginación y los datos correctos
-        $this->getJson('/api/v1/tags')
+        $this->actingAs($user, "sanctum")
+            ->getJson('/api/v1/tags')
             ->assertStatus(200)
             ->assertJsonCount(10, 'data')
             ->assertJsonStructure([
@@ -82,28 +87,32 @@ class TagControllerTest extends TestCase
      */
     public function test_api_tag_index_without_data() : void
     {
+        // Usuario que simula la consulta a la API
+        $user = User::factory()->create();
+
         // Realiza la solicitud GET a la ruta index de tags y verifica que la respuesta venga en formato JSON con paginación y los datos vacios
-        $this->getJson('/api/v1/tags')
-        ->assertStatus(200)
-        ->assertJsonCount(0, 'data')
-        ->assertJsonStructure([
-            'data' => [],
-            'links' => [
-                'first',
-                'last',
-                'prev',
-                'next'
-            ],
-            'meta' => [
-                'current_page',
-                'from',
-                'last_page',
-                'path',
-                'per_page',
-                'to',
-                'total'
-            ]
-        ]);
+        $this->actingAs($user, "sanctum")
+            ->getJson('/api/v1/tags')
+            ->assertStatus(200)
+            ->assertJsonCount(0, 'data')
+            ->assertJsonStructure([
+                'data' => [],
+                'links' => [
+                    'first',
+                    'last',
+                    'prev',
+                    'next'
+                ],
+                'meta' => [
+                    'current_page',
+                    'from',
+                    'last_page',
+                    'path',
+                    'per_page',
+                    'to',
+                    'total'
+                ]
+            ]);
     }
 
     /**
@@ -113,20 +122,24 @@ class TagControllerTest extends TestCase
      */
     public function test_api_tag_show() : void
     {
+        // Usuario que simula la consulta a la API
+        $user = User::factory()->create();
+
         $tag = Tag::factory()->create();
 
         // Realiza la solicitud GET a la ruta show de una etiqueta específica y verifica la respuesta
-        $this->getJson('/api/v1/tags/' . $tag->id)
-        ->assertStatus(200)
-        ->assertJsonFragment([
-            'id' => $tag->id,
-            "type" => "tag",
-            "attributes" => [
-                'name' => $tag->name,
-            ],
-            "relationships" => [
-                'recipes' => $tag->recipes
-            ]
-        ]);    
+        $this->actingAs($user, "sanctum")
+            ->getJson('/api/v1/tags/' . $tag->id)
+            ->assertStatus(200)
+            ->assertJsonFragment([
+                'id' => $tag->id,
+                "type" => "tag",
+                "attributes" => [
+                    'name' => $tag->name,
+                ],
+                "relationships" => [
+                    'recipes' => $tag->recipes
+                ]
+            ]);
     }
 }
