@@ -31,5 +31,13 @@ class LoginController extends Controller
                 'message' => 'The provided credentials are incorrect.'
             ], Response::HTTP_UNAUTHORIZED);
         }
+
+        // Si la autenticación es exitosa, genera un token para el usuario autenticado
+        $token = $request->user()->createToken($request->device_name)->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'message' => 'Login Successful'
+        ], Response::HTTP_CREATED);
     }
 }
