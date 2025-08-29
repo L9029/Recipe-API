@@ -4,6 +4,8 @@ namespace Tests\Feature\Http\Controllers\Api\V1;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 use App\Models\Recipe;
 use App\Models\Category;
@@ -155,10 +157,16 @@ class RecipeControllerTest extends TestCase
      */
     public function test_api_recipe_store() : void 
     {
+        // Se crea un almacenamiento falso para las imagenes
+        Storage::fake("local");
+
         // Se crean los registros necesarios para el test
         $user = User::factory()->create();
         $category = Category::factory()->create();
         $tags = Tag::factory(2)->create();
+
+        // Imagen de prueba para subir
+        $image = UploadedFile::fake()->image("image_prueba.png");
 
         // Datos de prueba para crear una receta
         $data = [
@@ -166,7 +174,7 @@ class RecipeControllerTest extends TestCase
             "description" => "Descripción de la receta de prueba",
             "ingredients" => "Ingredientes de la receta de prueba",
             "instructions" => "Instrucciones de la receta de prueba",
-            "image" => "http://example.com/image.jpg",
+            "image" => $image,
             "category_id" => $category->id,
             "tags" => $tags->pluck("id")->toArray(),
             "user_id" => $user->id,
@@ -183,10 +191,13 @@ class RecipeControllerTest extends TestCase
             "description" => $data["description"],
             "ingredients" => $data["ingredients"],
             "instructions" => $data["instructions"],
-            "image" => $data["image"],
+            "image" => $image->hashName(),
             "category_id" => $data["category_id"],
             "user_id" => $data["user_id"],
         ]);
+
+        // Se verifica que la imagen se haya almacenado correctamente en el disco local.
+        Storage::disk("local")->assertExists("{$image->hashName()}");
     }
 
     /**
@@ -211,7 +222,7 @@ class RecipeControllerTest extends TestCase
         $this->actingAs($user, "sanctum")
             ->postJson("api/v1/recipes", $data)
             ->assertStatus(422)
-            ->assertJsonValidationErrors(['title', 'description', 'instructions', 'category_id', 'tags', "user_id"]);
+            ->assertJsonValidationErrors(['title', 'description', 'instructions', 'image','category_id', 'tags', "user_id"]);
     }
 
     /**
@@ -221,6 +232,9 @@ class RecipeControllerTest extends TestCase
      */
     public function test_api_recipe_update() : void 
     {
+        // Se crea un almacenamiento falso para las imagenes
+        Storage::fake("local");
+
         // Usuario dueño de la receta
         $user = User::factory()->create();
 
@@ -233,13 +247,16 @@ class RecipeControllerTest extends TestCase
         $category = Category::factory()->create();
         $tags = Tag::factory(2)->create();
 
+        // Imagen de prueba para subir
+        $image = UploadedFile::fake()->image("image_prueba.png");
+
         // Datos de prueba para actualizar una receta
         $data = [
             "title" => "Receta de prueba",
             "description" => "Descripción de la receta de prueba",
             "ingredients" => "Ingredientes de la receta de prueba",
             "instructions" => "Instrucciones de la receta de prueba",
-            "image" => "http://example.com/image.jpg",
+            "image" => $image,
             "category_id" => $category->id,
             "tags" => $tags->pluck("id")->toArray(),
         ];
@@ -256,10 +273,13 @@ class RecipeControllerTest extends TestCase
             "description" => $data["description"],
             "ingredients" => $data["ingredients"],
             "instructions" => $data["instructions"],
-            "image" => $data["image"],
+            "image" => $image->hashName(),
             "category_id" => $data["category_id"],
             "user_id" => $user->id,
         ]);
+
+        // Se verifica que la imagen se haya almacenado correctamente en el disco local.
+        Storage::disk("local")->assertExists("{$image->hashName()}");
     }
 
     /**
@@ -289,7 +309,7 @@ class RecipeControllerTest extends TestCase
         $this->actingAs($user, "sanctum")
             ->putJson("api/v1/recipes/{$recipe->id}", $data)
             ->assertStatus(422)
-            ->assertJsonValidationErrors(['title', 'description', 'instructions', 'category_id', 'tags']);
+            ->assertJsonValidationErrors(['title', 'description', 'instructions', 'image','category_id', 'tags']);
     }
 
     /**
@@ -313,7 +333,7 @@ class RecipeControllerTest extends TestCase
             "description" => "Descripción de la receta de prueba",
             "ingredients" => "Ingredientes de la receta de prueba",
             "instructions" => "Instrucciones de la receta de prueba",
-            "image" => "http://example.com/image.jpg",
+            "image" => UploadedFile::fake()->image("image_prueba.png"),
             "category_id" => $category->id,
             "tags" => $tags->pluck("id")->toArray(),
             "user_id" => $user->id,
