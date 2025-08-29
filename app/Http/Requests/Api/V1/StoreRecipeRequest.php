@@ -26,7 +26,7 @@ class StoreRecipeRequest extends FormRequest
             'description' => 'required|string|max:255',
             'ingredients' => 'required|string|max:255',
             'instructions' => 'required|string|max:255',
-            'image' => 'required|url|max:255',
+            'image' => 'required|image|mimes:png|max:2048',
             'category_id' => 'required|exists:categories,id',
             'tags' => 'required|array|exists:tags,id',
             'user_id' => 'required|exists:users,id',
