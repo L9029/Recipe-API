@@ -41,7 +41,7 @@ class RecipeController extends Controller
             'description' => $request->description,
             'ingredients' => $request->ingredients,
             'instructions' => $request->instructions,
-            'image' => $request->image,
+            'image' => $request->file("image")->store(), // Almacena la imagen y guarda la ruta
             'category_id' => $request->category_id,
             'user_id' => $request->user_id,
         ]);
@@ -79,7 +79,7 @@ class RecipeController extends Controller
             "description" => $request->description,
             "ingredients" => $request->ingredients,
             "instructions" => $request->instructions,
-            "image" => $request->image,
+            'image' => $request->file("image")->store(), // Almacena la imagen y guarda la ruta
             "category_id" => $request->category_id,
             "user_id" => $request->user()->id,
         ]);
