@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\Api\LoginRequest;
 use App\Models\User;
+use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
@@ -22,6 +23,13 @@ class LoginController extends Controller
      */
     public function login(LoginRequest $request) 
     {
-        
+        $credentials = $request->only("email", "password");
+
+        // Intenta autenticar al usuario con las credenciales proporcionadas
+        if (!Auth::attempt($credentials)) {
+            return response()->json([
+                'message' => 'The provided credentials are incorrect.'
+            ], Response::HTTP_UNAUTHORIZED);
+        }
     }
 }
