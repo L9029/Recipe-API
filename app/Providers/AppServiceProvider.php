@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Gate; // Se Importa la clase Gate para definir po
 use App\Models\Recipe;
 use App\Policies\RecipePolicy;
 
-
 class AppServiceProvider extends ServiceProvider
 {
     /**

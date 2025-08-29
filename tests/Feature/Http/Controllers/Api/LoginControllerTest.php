@@ -82,7 +82,7 @@ class LoginControllerTest extends TestCase
         // Datos Correctos
         $data = [
             "email" => $user->email,
-            "password" => $user->password,
+            "password" => "password",
             "device_name" => "android",
         ];
 
